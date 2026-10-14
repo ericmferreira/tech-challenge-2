@@ -53,7 +53,7 @@ resource "helm_release" "load_balancer_controller" {
   name       = local.lbc_name
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-load-balancer-controller"
-  version    = "1.14.0"
+  version    = "1.14.1"
   namespace  = local.lbc_namespace
 
   wait    = true

@@ -33,6 +33,8 @@ spec:
                 secretKeyRef:
                   name: secrets-togglemaster
                   key: FLAG_POSTGRES_DB
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           startupProbe:
             exec:
               command:
@@ -52,7 +54,7 @@ spec:
             periodSeconds: 10
           volumeMounts:
             - name: db-data
-              mountPath: /var/lib/postgresql/data/pgdata
+              mountPath: /var/lib/postgresql/data
             - name: init-script
               mountPath: /docker-entrypoint-initdb.d/init.sql
               subPath: init.sql
