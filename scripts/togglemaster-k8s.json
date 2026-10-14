@@ -1,0 +1,99 @@
+{
+    "info": {
+        "name": "Togglemaster K8s Local",
+        "description": "Rotas para validar os 5 microsserviços via NGINX Ingress no Kubernetes.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auth Service - Health",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "http://localhost/auth/health",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "path": [
+                        "auth",
+                        "health"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Flag Service - Health",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "http://localhost/flag/health",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "path": [
+                        "flag",
+                        "health"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Targeting Service - Health",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "http://localhost/targeting/health",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "path": [
+                        "targeting",
+                        "health"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Evaluation Service - Health",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "http://localhost/evaluation/health",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "path": [
+                        "evaluation",
+                        "health"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Analytics Service - Health",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "http://localhost/analytics/health",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "path": [
+                        "analytics",
+                        "health"
+                    ]
+                }
+            }
+        }
+    ]
+}

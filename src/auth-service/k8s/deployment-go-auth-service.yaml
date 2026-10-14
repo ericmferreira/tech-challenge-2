@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-go-auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels: 
+        app: auth-service
+    spec:
+      containers:
+        - name: go-auth-service
+          image: auth-service:latest
+          env:
+            - name: MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: secrets-k8s-auth-service
+                  key: MASTER_KEY
+            - name: PORT
+              value: "8001"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: secrets-k8s-auth-service
+                  key: DATABASE_URL
+
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+
+          ports:
+            - containerPort: 8001

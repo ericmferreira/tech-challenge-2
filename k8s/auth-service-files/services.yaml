@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service-database
+spec:
+  selector:
+    app: auth-service-database
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service-app
+spec:
+  selector:
+    app: auth-service-app
+  ports:
+    - protocol: TCP
+      port: 8001
+      targetPort: 8001
+  type: ClusterIP
