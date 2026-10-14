@@ -1,0 +1,27 @@
+meta {
+  name: Targeting - Criar regra 50 porcento
+  type: http
+  seq: 2
+}
+post {
+  url: http://localhost:8003/rules
+  body: json
+  auth: none
+}
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{TOKEN}}
+}
+body:json {
+  {
+    "flag_name": "enable-new-dashboard",
+    "is_enabled": true,
+    "rules": {
+      "type": "PERCENTAGE",
+      "value": 50
+    }
+  }
+}
+assert {
+  res.status: 200
+}

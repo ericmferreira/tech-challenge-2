@@ -1,0 +1,17 @@
+meta {
+  name: Auth - Validar TOKEN
+  type: http
+  seq: 3
+}
+get {
+  url: http://localhost:8001/validate
+  body: none
+  auth: none
+}
+headers {
+  Authorization: Bearer {{TOKEN}}
+}
+assert {
+  res.status: 200
+  res.body.message: "Chave válida"
+}

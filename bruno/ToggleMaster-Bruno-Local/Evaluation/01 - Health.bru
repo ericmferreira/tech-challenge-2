@@ -1,0 +1,14 @@
+meta {
+  name: Evaluation - Health
+  type: http
+  seq: 1
+}
+get {
+  url: http://localhost:8004/health
+  body: none
+  auth: none
+}
+assert {
+  res.status: 200
+  res.body.status: "ok"
+}

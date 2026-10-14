@@ -1,0 +1,26 @@
+meta {
+  name: Auth - Criar TOKEN
+  type: http
+  seq: 2
+}
+post {
+  url: http://localhost:8001/admin/keys
+  body: json
+  auth: none
+}
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{MASTER_KEY}}
+}
+body:json {
+  {
+    "name": "bruno-test-client"
+  }
+}
+tests {
+  test("gera e salva o TOKEN", function() {
+    expect(res.status).to.be.oneOf([200, 201]);
+    expect(res.body).to.have.property("key");
+    bru.setEnvVar("TOKEN", res.body.key);
+  });
+}

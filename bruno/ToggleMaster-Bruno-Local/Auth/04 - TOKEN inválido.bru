@@ -1,0 +1,16 @@
+meta {
+  name: Auth - TOKEN inválido
+  type: http
+  seq: 4
+}
+get {
+  url: http://localhost:8001/validate
+  body: none
+  auth: none
+}
+headers {
+  Authorization: Bearer token-invalido-bruno
+}
+assert {
+  res.status: 401
+}

@@ -1,0 +1,13 @@
+meta {
+  name: Flag - Sem TOKEN
+  type: http
+  seq: 2
+}
+get {
+  url: http://localhost:8002/flags
+  body: none
+  auth: none
+}
+assert {
+  res.status: 401
+}

@@ -1,0 +1,15 @@
+meta {
+  name: Evaluation - Avaliar user-abc
+  type: http
+  seq: 3
+}
+get {
+  url: http://localhost:8004/evaluate?user_id=user-abc&flag_name=enable-new-dashboard
+  body: none
+  auth: none
+}
+assert {
+  res.status: 200
+  res.body.flag_name: "enable-new-dashboard"
+  res.body.user_id: "user-abc"
+}

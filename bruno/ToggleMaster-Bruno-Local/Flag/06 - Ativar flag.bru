@@ -1,0 +1,23 @@
+meta {
+  name: Flag - Ativar flag
+  type: http
+  seq: 6
+}
+put {
+  url: http://localhost:8002/flags/enable-new-dashboard
+  body: json
+  auth: none
+}
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{TOKEN}}
+}
+body:json {
+  {
+    "is_enabled": true
+  }
+}
+assert {
+  res.status: 200
+  res.body.is_enabled: true
+}

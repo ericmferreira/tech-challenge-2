@@ -1,4 +1,37 @@
 services:
+# ANALYTICS-SERVICE
+
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    container_name: dynamodb-local
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    working_dir: /home/dynamodblocal
+    ports:
+      - "8000:8000"
+    volumes:
+      - dynamodb-local-data:/home/dynamodblocal/data
+
+  analytics-service-app:
+    build:
+      context: ./src/analytics-service/.
+      dockerfile: Dockerfile
+    container_name: analytics-service-app
+    ports:
+      - "8005:8005"
+    environment:
+      PORT: "8005"
+      AWS_REGION: ${AWS_REGION}
+      AWS_SQS_URL: ${AWS_SQS_URL}
+      AWS_DYNAMODB_TABLE: ${AWS_DYNAMODB_TABLE}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      # AWS_ENDPOINT_URL_DYNAMODB: http://dynamodb-local:8000
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8005/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 # AUTH-SERVICE
   auth-service-database:
     image: postgres:13
@@ -84,26 +117,6 @@ services:
       targeting-service-database:
         condition: service_healthy
 
-# ANALYTICS-SERVICE
-  analytics-service-app:
-    build:
-      context: ./src/analytics-service/.
-      dockerfile: Dockerfile
-    container_name: analytics-service-app
-    ports:
-      - "8005:8005"
-    environment:
-      PORT: "8005"
-      AWS_REGION: ${AWS_REGION}
-      AWS_SQS_URL: ${AWS_SQS_URL}
-      AWS_DYNAMODB_TABLE: ${AWS_DYNAMODB_TABLE}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8005/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 # EVALUATION-SERVICE
   evaluation-service-redis:
@@ -131,6 +144,10 @@ services:
       TARGETING_SERVICE_URL: http://targeting-service-app:8003
       AWS_SQS_URL: ${AWS_SQS_URL}
       AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+
+
     depends_on:
       evaluation-service-redis:
         condition: service_healthy
@@ -160,7 +177,7 @@ services:
       - flag-db-data:/var/lib/postgresql/data
       - ./src/flag-service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${FLAG_POSTGRES_USER} -d ${FLAG_POSTGRES_DB"]
+      test: ["CMD-SHELL", "pg_isready -U ${FLAG_POSTGRES_USER} -d ${FLAG_POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -191,3 +208,4 @@ volumes:
   auth-db-data:
   targeting-db-data:
   flag-db-data:
+  dynamodb-local-data:
