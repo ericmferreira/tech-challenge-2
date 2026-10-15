@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-service-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytics-service-app
+  template:
+    metadata:
+      labels:
+        app: analytics-service-app
+    spec:
+      containers:
+        - name: analytics-service-app
+          image: analytics-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8005
+          envFrom:
+            - configMapRef:
+                name: analytics-service-config
+            - secretRef:
+                name: secrets-togglemaster
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8005
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 30                
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8005
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5 # Aumentado de 1 para 5 segundos
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8005
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5 # Aumentado de 1 para 5 segundos                
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"

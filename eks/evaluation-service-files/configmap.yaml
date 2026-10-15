@@ -4,6 +4,8 @@ metadata:
   name: evaluation-service-config
 data:
   PORT: "8004"
+  AWS_SQS_URL: "https://sqs.us-east-2.amazonaws.com/870737143013/analytics-queue"
+  AWS_REGION: "us-east-2"
   REDIS_URL: "redis://evaluation-service-redis:6379"
   FLAG_SERVICE_URL: "http://flag-service-app:8002"
   TARGETING_SERVICE_URL: "http://targeting-service-app:8003"

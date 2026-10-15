@@ -1,26 +1,27 @@
-@"
-# Terraform
+# Terraform local cache/state/plans
 **/.terraform/*
 *.tfstate
 *.tfstate.*
-*.tfstate.backup
+*.tfplan
 crash.log
 crash.*.log
-*.tfplan
 
-# Secrets and local configuration
-*.tfvars
-*.tfvars.json
+# Local Terraform variables may contain network/account information
+**/terraform.tfvars
+**/terraform.tfvars.json
 
-# Python
+# Kubernetes Secret with live credentials
+eks/global-files/secrets-togglemaster.yaml
+**/secrets-togglemaster.yaml
+
+# Local/temporary generated files
+*.log
+.env
+.env.*
 __pycache__/
 *.py[cod]
 .venv/
 venv/
 
-# Environment variables
-.env
-.env.*
-
-# ToggleMaster Kubernetes secrets — NEVER commit
-**/secrets-togglemaster.yaml
+# Reused by destroy to supply the required Terraform variable
+.togglemaster-admin-cidr

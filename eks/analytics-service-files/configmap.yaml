@@ -7,3 +7,6 @@ metadata:
     app: analytics-service-app
 data:
   PORT: "8005"
+  AWS_REGION: "us-east-2"
+  AWS_SQS_URL: "https://sqs.us-east-2.amazonaws.com/870737143013/analytics-queue"
+  AWS_DYNAMODB_TABLE: "ToggleMasterAnalytics"

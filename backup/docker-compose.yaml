@@ -1,0 +1,211 @@
+services:
+# ANALYTICS-SERVICE
+
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    container_name: dynamodb-local
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    working_dir: /home/dynamodblocal
+    ports:
+      - "8000:8000"
+    volumes:
+      - dynamodb-local-data:/home/dynamodblocal/data
+
+  analytics-service-app:
+    build:
+      context: ./src/analytics-service/.
+      dockerfile: Dockerfile
+    container_name: analytics-service-app
+    ports:
+      - "8005:8005"
+    environment:
+      PORT: "8005"
+      AWS_REGION: ${AWS_REGION}
+      AWS_SQS_URL: ${AWS_SQS_URL}
+      AWS_DYNAMODB_TABLE: ${AWS_DYNAMODB_TABLE}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_ENDPOINT_URL_DYNAMODB: http://dynamodb-local:8000
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8005/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# AUTH-SERVICE
+  auth-service-database:
+    image: postgres:13
+    container_name: auth-service-database
+    environment:
+      POSTGRES_USER: ${AUTH_POSTGRES_USER:-auth_user}
+      POSTGRES_PASSWORD: ${AUTH_POSTGRES_PWD:-password}
+      POSTGRES_DB: ${AUTH_POSTGRES_DB:-auth_db}
+    ports:
+      - "5433:5432"
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+      - ./src/auth-service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AUTH_POSTGRES_USER} -d ${AUTH_POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth-service-app:
+    build:
+      context: ./src/auth-service/.
+      dockerfile: Dockerfile
+    container_name: auth-service-app
+    ports:
+      - "8001:8001"
+    environment:
+      MASTER_KEY: ${MASTER_KEY:-P@ssw0rdMk&y}
+      PORT: "8001"
+      DATABASE_URL: ${AUTH_DATABASE_URL}
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      auth-service-database:
+        condition: service_healthy
+
+# TARGETING-SERVICE
+  targeting-service-database:
+    image: postgres:13
+    container_name: targeting-service-database
+    environment:
+      POSTGRES_USER: ${TARGETING_POSTGRES_USER:-targeting_user}
+      POSTGRES_PASSWORD: ${TARGETING_POSTGRES_PWD:-password}
+      POSTGRES_DB: ${TARGETING_POSTGRES_DB:-targeting_db}
+
+    ports:
+      - "5432:5432"
+    volumes:
+      - targeting-db-data:/var/lib/postgresql/data
+      - ./src/targeting-service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${TARGETING_POSTGRES_USER} -d ${TARGETING_POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  targeting-service-app:
+    build:
+      context: ./src/targeting-service/.
+      dockerfile: Dockerfile
+    container_name: targeting-service-app
+    environment:
+      DATABASE_URL: ${TARGETING_DATABASE_URL}
+      AUTH_SERVICE_URL: http://auth-service-app:8001
+    ports:
+      - "8003:8003"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8003/health')"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      targeting-service-database:
+        condition: service_healthy
+
+
+# EVALUATION-SERVICE
+  evaluation-service-redis:
+    image: redis:7
+    container_name: evaluation-service-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  evaluation-service-app:
+    build:
+      context: ./src/evaluation-service/.
+      dockerfile: Dockerfile
+    container_name: evaluation-service-app
+    ports:
+      - "8004:8004"
+    environment:
+      REDIS_URL: redis://evaluation-service-redis:6379
+      FLAG_SERVICE_URL: http://flag-service-app:8002
+      SERVICE_API_KEY: ${EVALUATION_TM_KEY}
+      TARGETING_SERVICE_URL: http://targeting-service-app:8003
+      AWS_SQS_URL: ${AWS_SQS_URL}
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+
+
+    depends_on:
+      evaluation-service-redis:
+        condition: service_healthy
+      auth-service-app:
+        condition: service_healthy
+      flag-service-app:
+        condition: service_healthy
+      targeting-service-app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8004/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# FLAG-SERVICE
+  flag-service-database:
+    image: postgres:13
+    container_name: flag-service-database
+    environment:
+      POSTGRES_USER: ${FLAG_POSTGRES_USER:-flag_user}
+      POSTGRES_PASSWORD: ${FLAG_POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${FLAG_POSTGRES_DB:-flag_db}
+    ports:
+      - "5434:5432"
+    volumes:
+      - flag-db-data:/var/lib/postgresql/data
+      - ./src/flag-service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${FLAG_POSTGRES_USER} -d ${FLAG_POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  flag-service-app:
+    build:
+      context: ./src/flag-service/.
+      dockerfile: Dockerfile
+    container_name: flag-service-app
+    ports:
+      - "8002:8002"
+    environment:
+      DATABASE_URL: ${FLAG_DATABASE_URL}
+      PORT: "8002"
+      AUTH_SERVICE_URL: http://auth-service-app:8001
+    depends_on:
+      auth-service-app:
+        condition: service_healthy
+      flag-service-database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8002/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  auth-db-data:
+  targeting-db-data:
+  flag-db-data:
+  dynamodb-local-data:

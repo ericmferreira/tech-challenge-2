@@ -1,0 +1,73 @@
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: togglemaster-ingress
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+
+    alb.ingress.kubernetes.io/transforms.auth-service-app: >
+      [{"type":"url-rewrite","urlRewriteConfig":{"rewrites":[{"regex":"^/auth/?(.*)$","replace":"/$1"}]}}]
+
+    alb.ingress.kubernetes.io/transforms.flag-service-app: >
+      [{"type":"url-rewrite","urlRewriteConfig":{"rewrites":[{"regex":"^/flag/?(.*)$","replace":"/$1"}]}}]
+
+    alb.ingress.kubernetes.io/transforms.targeting-service-app: >
+      [{"type":"url-rewrite","urlRewriteConfig":{"rewrites":[{"regex":"^/targeting/?(.*)$","replace":"/$1"}]}}]
+
+    alb.ingress.kubernetes.io/transforms.evaluation-service-app: >
+      [{"type":"url-rewrite","urlRewriteConfig":{"rewrites":[{"regex":"^/evaluation/?(.*)$","replace":"/$1"}]}}]
+
+    alb.ingress.kubernetes.io/transforms.analytics-service-app: >
+      [{"type":"url-rewrite","urlRewriteConfig":{"rewrites":[{"regex":"^/analytics/?(.*)$","replace":"/$1"}]}}]
+
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service-app
+                port:
+                  number: 8001
+
+          - path: /flag
+            pathType: Prefix
+            backend:
+              service:
+                name: flag-service-app
+                port:
+                  number: 8002
+
+          - path: /targeting
+            pathType: Prefix
+            backend:
+              service:
+                name: targeting-service-app
+                port:
+                  number: 8003
+
+          - path: /evaluation
+            pathType: Prefix
+            backend:
+              service:
+                name: evaluation-service-app
+                port:
+                  number: 8004
+
+          - path: /analytics
+            pathType: Prefix
+            backend:
+              service:
+                name: analytics-service-app
+                port:
+                  number: 8005

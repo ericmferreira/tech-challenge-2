@@ -1,5 +1,5 @@
 # --- BUILDER ---
-FROM python:3.9 AS builder
+FROM python:3.12 AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN python3.9 -m venv /app/venv
+RUN python -m venv /app/venv
 
 ENV PATH="/app/venv/bin:$PATH"
 
@@ -19,7 +19,7 @@ RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # --- RUNNER ---
-FROM python:3.9-slim AS runner
+FROM python:3.12-slim AS runner
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \

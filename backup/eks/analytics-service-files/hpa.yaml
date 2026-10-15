@@ -1,0 +1,60 @@
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: analytics-sqs-auth
+  namespace: default
+spec:
+  podIdentity:
+    provider: aws
+---
+
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: analytics-service-scaledobject
+  namespace: default
+  annotations:
+    scaledobject.keda.sh/transfer-hpa-ownership: "true"
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: analytics-service-app
+
+  pollingInterval: 15
+  cooldownPeriod: 300
+  minReplicaCount: 2
+  maxReplicaCount: 5
+
+  advanced:
+    horizontalPodAutoscalerConfig:
+      name: analytics-service-hpa
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 0
+          selectPolicy: Max
+          policies:
+            - type: Pods
+              value: 2
+              periodSeconds: 60
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          selectPolicy: Max
+          policies:
+            - type: Pods
+              value: 1
+              periodSeconds: 60
+
+  triggers:
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "70"
+
+    - type: aws-sqs-queue
+      authenticationRef:
+        name: analytics-sqs-auth
+      metadata:
+        queueURL: "https://sqs.us-east-2.amazonaws.com/870737143013/analytics-queue"
+        awsRegion: us-east-2
+        queueLength: "5"

@@ -1,0 +1,26 @@
+@"
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+crash.log
+crash.*.log
+*.tfplan
+
+# Secrets and local configuration
+*.tfvars
+*.tfvars.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environment variables
+.env
+.env.*
+
+# ToggleMaster Kubernetes secrets — NEVER commit
+**/secrets-togglemaster.yaml

@@ -1,3 +1,9 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: analytics-service
+  namespace: default
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -12,17 +18,16 @@ spec:
       labels:
         app: analytics-service-app
     spec:
+      serviceAccountName: analytics-service
       containers:
         - name: analytics-service-app
           image: 870737143013.dkr.ecr.us-east-2.amazonaws.com/togglemaster/analytics-service:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8005
           envFrom:
             - configMapRef:
                 name: analytics-service-config
-            - secretRef:
-                name: secrets-togglemaster
           startupProbe:
             httpGet:
               path: /health

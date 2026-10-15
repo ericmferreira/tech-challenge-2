@@ -35,22 +35,31 @@ spec:
                   key: TARGETING_POSTGRES_DB
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
           startupProbe:
             exec:
-              command:
-                - pg_isready
-                - -h
-                - 127.0.0.1
-                - -p
-                - "5432"
+              command: ["pg_isready", "-h", "127.0.0.1", "-p", "5432"]
             periodSeconds: 5
             timeoutSeconds: 3
-            failureThreshold: 30          
+            failureThreshold: 60
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-h", "127.0.0.1", "-p", "5432"]
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
           livenessProbe:
             exec:
-              command: ["pg_isready", "-U", "$(POSTGRES_USER)", "-d", "$(POSTGRES_DB)"]
-            initialDelaySeconds: 10
+              command: ["pg_isready", "-h", "127.0.0.1", "-p", "5432"]
             periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
           volumeMounts:
             - name: db-data
               mountPath: /var/lib/postgresql/data
@@ -79,17 +88,27 @@ spec:
       labels:
         app: targeting-service-app
     spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z targeting-service-database 5432; do
+                echo "Aguardando PostgreSQL..."
+                sleep 2
+              done
+              echo "PostgreSQL acessível."
       containers:
         - name: targeting-service-app
           image: 870737143013.dkr.ecr.us-east-2.amazonaws.com/togglemaster/targeting-service:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8003
           envFrom:
             - configMapRef:
                 name: targeting-service-config
-            - secretRef:
-                name: secrets-togglemaster
           env:
             - name: DATABASE_URL
               valueFrom:
