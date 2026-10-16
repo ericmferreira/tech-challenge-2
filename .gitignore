@@ -25,3 +25,5 @@ venv/
 
 # Reused by destroy to supply the required Terraform variable
 .togglemaster-admin-cidr
+
+backup/
