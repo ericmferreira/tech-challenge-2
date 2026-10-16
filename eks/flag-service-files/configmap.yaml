@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: flag-db-init-script
+  namespace: togglemaster
 data:
   init.sql: |
     CREATE TABLE IF NOT EXISTS flags (
@@ -40,6 +41,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: flag-service-config
+  namespace: togglemaster
 data:
   PORT: "8002"
   AUTH_SERVICE_URL: "http://auth-service-app:8001"

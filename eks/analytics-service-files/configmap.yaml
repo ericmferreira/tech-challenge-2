@@ -3,6 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: analytics-service-config
+  namespace: togglemaster
   labels:
     app: analytics-service-app
 data:

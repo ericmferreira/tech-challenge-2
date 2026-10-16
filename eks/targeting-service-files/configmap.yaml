@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: targeting-db-init-script
+  namespace: togglemaster
 data:
   init.sql: |
     CREATE TABLE IF NOT EXISTS targeting_rules (
@@ -43,6 +44,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: targeting-service-config
+  namespace: togglemaster
 data:
   PORT: "8003"
   AUTH_SERVICE_URL: "http://auth-service-app:8001"

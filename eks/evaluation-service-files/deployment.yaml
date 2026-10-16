@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: evaluation-service
-  namespace: default
+  namespace: togglemaster
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -17,6 +17,7 @@ spec:
     metadata:
       labels:
         app: evaluation-service-redis
+        namespace: togglemaster
     spec:
       containers:
         - name: redis
@@ -53,6 +54,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: evaluation-service-app
+  namespace: togglemaster
 spec:
   replicas: 2
   selector:

@@ -2,7 +2,7 @@ apiVersion: keda.sh/v1alpha1
 kind: TriggerAuthentication
 metadata:
   name: analytics-sqs-auth
-  namespace: default
+  namespace: togglemaster
 spec:
   podIdentity:
     provider: aws
@@ -13,7 +13,7 @@ apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
   name: analytics-service-scaledobject
-  namespace: default
+  namespace: togglemaster
   annotations:
     scaledobject.keda.sh/transfer-hpa-ownership: "true"
 spec:

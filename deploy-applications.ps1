@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param()
 
 $ErrorActionPreference = "Stop"
@@ -7,7 +7,7 @@ $ProjectRoot = $PSScriptRoot
 $Region = "us-east-2"
 $ClusterName = "togglemaster-eks"
 $ExpectedAccountId = "870737143013"
-$Namespace = "default"
+$Namespace = "togglemaster"
 $EksRoot = Join-Path $ProjectRoot "eks"
 $SecretFile = Join-Path $EksRoot "global-files\secrets-togglemaster.yaml"
 
@@ -121,6 +121,14 @@ if ($LASTEXITCODE -ne 0 -or $TableStatus -ne "ACTIVE") {
 foreach ($Service in @("auth-service", "flag-service", "targeting-service", "evaluation-service", "analytics-service")) {
     Test-EcrImage -Service $Service
 }
+
+# Create the shared application namespace before applying any application resources.
+# Namespace is cluster-scoped; all app manifests should declare namespace: togglemaster.
+$NamespaceManifest = Join-Path $EksRoot "namespace.yaml"
+if (-not (Test-Path -LiteralPath $NamespaceManifest -PathType Leaf)) {
+    throw "Namespace manifest not found: $NamespaceManifest. Create eks\namespace.yaml with metadata.name: togglemaster before deploying."
+}
+Apply-Manifest "eks\namespace.yaml"
 
 # Only create the Kubernetes Secret if it does not already exist. This avoids
 # overwriting a newly generated service key or credentials during a rerun.
@@ -299,7 +307,7 @@ for ($Attempt = 0; $Attempt -lt 90; $Attempt++) {
     Start-Sleep -Seconds 10
 }
 if ([string]::IsNullOrWhiteSpace($AlbHost)) {
-    Write-Warning "The Ingress was applied but the ALB hostname has not appeared yet. Run: kubectl describe ingress togglemaster-ingress -n default"
+    Write-Warning "The Ingress was applied but the ALB hostname has not appeared yet. Run: kubectl describe ingress togglemaster-ingress -n $Namespace"
 }
 else {
     Write-Host "`nToggleMaster deployed. ALB: http://$AlbHost" -ForegroundColor Green

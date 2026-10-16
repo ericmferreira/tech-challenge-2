@@ -2,12 +2,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: analytics-service
-  namespace: default
+  namespace: togglemaster
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: analytics-service-app
+  namespace: togglemaster
 spec:
   replicas: 1
   selector:

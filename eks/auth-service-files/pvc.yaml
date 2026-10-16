@@ -4,6 +4,7 @@ metadata:
   name: auth-db-pvc
   labels:
     app: auth-service-database
+    namespace: togglemaster
 spec:
   storageClassName: gp3
   accessModes:

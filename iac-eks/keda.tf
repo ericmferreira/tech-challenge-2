@@ -88,7 +88,7 @@ resource "aws_iam_role_policy" "evaluation_service" {
 
 resource "aws_eks_pod_identity_association" "evaluation_service" {
   cluster_name    = module.eks.cluster_name
-  namespace       = "default"
+  namespace       = "togglemaster"
   service_account = "evaluation-service"
   role_arn        = aws_iam_role.evaluation_service.arn
 
@@ -135,7 +135,7 @@ resource "aws_iam_role_policy" "analytics_service" {
 
 resource "aws_eks_pod_identity_association" "analytics_service" {
   cluster_name    = module.eks.cluster_name
-  namespace       = "default"
+  namespace       = "togglemaster"
   service_account = "analytics-service"
   role_arn        = aws_iam_role.analytics_service.arn
 
