@@ -152,17 +152,17 @@ O `k8s/` antigo e os scripts manuais de instalação/patch não são mais o cami
 ```powershell
 kubectl get nodes
 kubectl get pods -A
-kubectl get pvc -n default
-kubectl get hpa -n default
-kubectl get scaledobject,triggerauthentication -n default
-kubectl get ingress -n default
+kubectl get pvc -n togglemaster
+kubectl get hpa -n togglemaster
+kubectl get scaledobject,triggerauthentication -n togglemaster
+kubectl get ingress -n togglemaster
 ```
 
 Para validar o KEDA, coloque carga pelo fluxo real de Evaluation (o arquivo `eks/load-test-togglemaster.py` chama `/evaluation/evaluate`) e acompanhe:
 
 ```powershell
-kubectl get hpa analytics-service-hpa -n default -w
-kubectl get deployment analytics-service-app -n default -w
+kubectl get hpa analytics-service-hpa -n togglemaster -w
+kubectl get deployment analytics-service-app -n togglemaster -w
 ```
 
 O `ScaledObject` do Analytics gerencia o HPA existente chamado `analytics-service-hpa`; não há um segundo manifesto HPA de CPU competindo pelo mesmo Deployment.
