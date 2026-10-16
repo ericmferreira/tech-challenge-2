@@ -1,6 +1,13 @@
 # ToggleMaster — ambiente reproduzível em AWS EKS
 
 Este repositório contém a aplicação e sua infraestrutura para um cluster novo do laboratório. A configuração de runtime Kubernetes tem **um único local canônico: `eks/`**. Os dois states Terraform já existentes foram mantidos: `iac-req/` é dono do SQS/DynamoDB e `iac-eks/` é dono do EKS, ECR, IAM e add-ons.
+Fork dos projetos:
+- https://github.com/FIAP-TCs/auth-service
+- https://github.com/FIAP-TCs/analytics-service
+- https://github.com/FIAP-TCs/evaluation-service
+- https://github.com/FIAP-TCs/flag-service
+- https://github.com/FIAP-TCs/targeting-service
+
 
 ## Fluxo operacional reduzido
 
