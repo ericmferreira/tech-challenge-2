@@ -1,6 +1,0 @@
-aws_region         = "us-east-1"
-project_name       = "togglemaster"
-cluster_version    = "1.36"
-admin_cidr         = "REPLACE_WITH_YOUR_PUBLIC_IPV4/32"
-node_instance_type = "t3.large"
-node_disk_size     = 30

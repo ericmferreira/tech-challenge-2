@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: configmap-go-auth-service
-data:
-  POSTGRES_USER: b3JlZ2Vz

@@ -1,9 +1,0 @@
-### ANALYTICS SERVICE
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: analytics-service-config
-  labels:
-    app: analytics-service-app
-data:
-  PORT: "8005"
