@@ -1,6 +1,5 @@
 services:
 # ANALYTICS-SERVICE
-
   dynamodb-local:
     image: amazon/dynamodb-local:latest
     container_name: dynamodb-local
@@ -72,52 +71,6 @@ services:
       auth-service-database:
         condition: service_healthy
 
-# TARGETING-SERVICE
-  targeting-service-database:
-    image: postgres:13
-    container_name: targeting-service-database
-    environment:
-      POSTGRES_USER: ${TARGETING_POSTGRES_USER:-targeting_user}
-      POSTGRES_PASSWORD: ${TARGETING_POSTGRES_PWD:-password}
-      POSTGRES_DB: ${TARGETING_POSTGRES_DB:-targeting_db}
-
-    ports:
-      - "5432:5432"
-    volumes:
-      - targeting-db-data:/var/lib/postgresql/data
-      - ./src/targeting-service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${TARGETING_POSTGRES_USER} -d ${TARGETING_POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  targeting-service-app:
-    build:
-      context: ./src/targeting-service/.
-      dockerfile: Dockerfile
-    container_name: targeting-service-app
-    environment:
-      DATABASE_URL: ${TARGETING_DATABASE_URL}
-      AUTH_SERVICE_URL: http://auth-service-app:8001
-    ports:
-      - "8003:8003"
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "python",
-          "-c",
-          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8003/health')"
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    depends_on:
-      targeting-service-database:
-        condition: service_healthy
-
-
 # EVALUATION-SERVICE
   evaluation-service-redis:
     image: redis:7
@@ -146,7 +99,6 @@ services:
       AWS_REGION: ${AWS_REGION}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-
 
     depends_on:
       evaluation-service-redis:
@@ -203,6 +155,51 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+# TARGETING-SERVICE
+  targeting-service-database:
+    image: postgres:13
+    container_name: targeting-service-database
+    environment:
+      POSTGRES_USER: ${TARGETING_POSTGRES_USER:-targeting_user}
+      POSTGRES_PASSWORD: ${TARGETING_POSTGRES_PWD:-password}
+      POSTGRES_DB: ${TARGETING_POSTGRES_DB:-targeting_db}
+
+    ports:
+      - "5432:5432"
+    volumes:
+      - targeting-db-data:/var/lib/postgresql/data
+      - ./src/targeting-service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${TARGETING_POSTGRES_USER} -d ${TARGETING_POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  targeting-service-app:
+    build:
+      context: ./src/targeting-service/.
+      dockerfile: Dockerfile
+    container_name: targeting-service-app
+    environment:
+      DATABASE_URL: ${TARGETING_DATABASE_URL}
+      AUTH_SERVICE_URL: http://auth-service-app:8001
+    ports:
+      - "8003:8003"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8003/health')"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      targeting-service-database:
+        condition: service_healthy      
 
 volumes:
   auth-db-data:

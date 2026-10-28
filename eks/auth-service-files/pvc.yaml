@@ -2,9 +2,9 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: auth-db-pvc
+  namespace: togglemaster
   labels:
     app: auth-service-database
-    namespace: togglemaster
 spec:
   storageClassName: gp3
   accessModes:

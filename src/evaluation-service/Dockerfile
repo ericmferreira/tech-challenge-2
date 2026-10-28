@@ -22,6 +22,6 @@ WORKDIR /app
 COPY --from=builder /app/server /app/server
 
 # Porta esperada pela aplicação
-EXPOSE 8001
+EXPOSE 8004
 
 ENTRYPOINT ["/app/server"]
